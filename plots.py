@@ -7,9 +7,7 @@ import seaborn as sns
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-#################
-# Global config #
-#################
+# Set Global configuration
 
 mpl.rcParams['font.family'] = 'Malgun Gothic'
 mpl.rcParams['axes.unicode_minus'] = False
@@ -20,6 +18,62 @@ sns.set_palette("Set3")
 #############
 # Draw plot #
 #############
+
+def boxplot(
+        df:pd.DataFrame,
+        x:str,
+        y:str,
+        stripplot:bool = True,
+        hue:str = None,
+        title:str = None,
+        xlabel:str = None,
+        ylabel:str = None,
+        figsize:Tuple[int] = (10, 6),
+        tight_layout:bool = False
+    ):
+    fig, axe, fs = _get_baseplot(figsize=figsize)
+
+    palette = sns.palettes.color_palette()
+
+    box = sns.boxplot(
+        df,
+        x=x,
+        y=y, 
+        hue=hue,
+        ax=axe,
+        palette=palette,
+        width=0.5,
+        
+    )
+    if stripplot:
+        for patch in box.patches:
+            patch.set_alpha(0.6)
+        sns.stripplot(df, x=x, y=y, hue=hue, ax=axe, palette=palette)
+
+    axe = _set_label_layout(axe, fs, title, xlabel, ylabel, tight_layout)
+
+    return fig, axe
+
+def histplot(
+        df:pd.DataFrame,
+        x:str,
+        hue:str = None,
+        bins:int = 20,
+        kde:bool = False,
+        title:str = None,
+        xlabel:str = None,
+        ylabel:str = None,
+        figsize:Tuple[int] = (10, 6),
+        tight_layout:bool = False
+    ):
+    fig, axe, fs = _get_baseplot(figsize=figsize)
+
+    sns.histplot(df, x=x, hue=hue, bins=bins, kde=kde)
+    
+    axe = _set_label_layout(axe, fs, title, xlabel, ylabel, tight_layout)
+
+    return fig, axe
+
 
 def pieplot(
         df:pd.DataFrame,
