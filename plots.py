@@ -1,18 +1,18 @@
 import numpy as np
 import pandas as pd
 
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-import matplotlib as mpl
-mpl.rcParams['font.family'] = 'Malgun Gothic'
-mpl.rcParams['axes.unicode_minus'] = False
-
 from typing import Tuple, Dict
+
+import seaborn as sns
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 
 #################
 # Global config #
 #################
+
+mpl.rcParams['font.family'] = 'Malgun Gothic'
+mpl.rcParams['axes.unicode_minus'] = False
 
 plt.style.use("ggplot")
 sns.set_palette("Set3")
@@ -20,6 +20,40 @@ sns.set_palette("Set3")
 #############
 # Draw plot #
 #############
+
+def pieplot(
+        df:pd.DataFrame,
+        x:str,
+        y:str,
+        title:str = None,
+        center_text:str = None,
+        figsize:Tuple[int] = (10, 6),
+        tight_layout:bool = False
+    ):
+    fig, axe, fs = _get_baseplot(figsize=figsize)
+
+    _, texts, autotexts = axe.pie(
+        df[y],
+        radius=1,
+        labels=df[x],
+        labeldistance=1,
+        colors=sns.palettes.color_palette(),
+        wedgeprops=dict(width=0.45, edgecolor='white'),
+        autopct='%1.1f%%'
+    )
+
+    for text, autotext in zip(texts, autotexts):
+        x, y = text.get_position()
+        text.set_text(f"{text.get_text()}: {autotext.get_text()}")
+        text.set_fontsize(fs['tick'])
+        text.set_position((1.07*x, 1.07*y))
+        autotext.set_text(None)
+  
+    axe.text(0, 0, center_text, ha='center', va='center', fontsize=fs['label'])
+
+    axe = _set_label_layout(axe, fs, title, '', '', tight_layout)
+ 
+    return fig, axe
 
 def barplot(
         df:pd.DataFrame,
