@@ -31,6 +31,8 @@ def pieplot(
         tight_layout:bool = False
     ):
     fig, axe, fs = _get_baseplot(figsize=figsize)
+    
+    linewidth = figsize[0] * figsize[1] // 20
 
     _, texts, autotexts = axe.pie(
         df[y],
@@ -38,7 +40,7 @@ def pieplot(
         labels=df[x],
         labeldistance=1,
         colors=sns.palettes.color_palette(),
-        wedgeprops=dict(width=0.45, edgecolor='white'),
+        wedgeprops=dict(width=0.45, edgecolor='white', linewidth=linewidth),
         autopct='%1.1f%%'
     )
 
