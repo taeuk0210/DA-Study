@@ -19,6 +19,37 @@ sns.set_palette("Set3")
 # Draw plot #
 #############
 
+def violinplot(
+        df:pd.DataFrame,
+        x:str,
+        y:str,
+        hue:str = None,
+        title:str = None,
+        xlabel:str = None,
+        ylabel:str = None,
+        figsize:Tuple[int] = (10, 6),
+        tight_layout:bool = False
+    ):
+    fig, axe, fs = _get_baseplot(figsize=figsize)
+
+    palette = sns.palettes.color_palette()
+
+    sns.violinplot(
+        df,
+        x=x,
+        y=y, 
+        hue=hue,
+        ax=axe,
+        palette=palette,
+        width=0.5,
+        
+    )
+
+    axe = _set_label_layout(axe, fs, title, xlabel, ylabel, tight_layout)
+
+    return fig, axe
+
+
 def boxplot(
         df:pd.DataFrame,
         x:str,
