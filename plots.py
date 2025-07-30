@@ -15,6 +15,8 @@ mpl.rcParams['axes.unicode_minus'] = False
 plt.style.use("ggplot")
 sns.set_palette("Set3")
 
+
+
 #############
 # Draw plot #
 #############
@@ -63,7 +65,7 @@ def boxplot(
         tight_layout:bool = False
     ):
     fig, axe, fs = _get_baseplot(figsize=figsize)
-
+    
     palette = sns.palettes.color_palette()
 
     box = sns.boxplot(
@@ -165,7 +167,7 @@ def barplot(
     return fig, axe
 
 #############
-# Utiliteis #
+# Utilities #
 #############
 
 def _get_fontsize(figsize, base_area=40):
