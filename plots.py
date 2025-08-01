@@ -1,21 +1,29 @@
 import numpy as np
 import pandas as pd
 
-from typing import Tuple, Dict
+from typing import Tuple, Dict, List
 
 import seaborn as sns
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-# Set Global configuration
+# Set global configuration
 
 mpl.rcParams['font.family'] = 'Malgun Gothic'
 mpl.rcParams['axes.unicode_minus'] = False
 
 plt.style.use("ggplot")
-sns.set_palette("Set3")
 
+# Set global constants
 
+_PALETTES = [
+    ["#A6E3E9", "#71C9CE", "#E3FDFD", "#CBF1F5"],
+    ["#3F72AF", "#112D4E", "#F9F7F7", "#DBE2EF"],
+    ["#FFD1D1", "#FF9494", "#FFF5E4", "#FFE3E1"],
+    ["#B83B5E", "#6A2C70", "#F9ED69", "#F08A5D"],
+    ["#F5F5F5", "#FC5185", "#364F6B", "#3FC1C9"],
+    ["#609966", "#40513B", "#EDF1D6", "#9DC08B"],
+]
 
 #############
 # Draw plot #
@@ -34,46 +42,81 @@ def lineplot(
     ):
     fig, axe, fs = _get_baseplot(figsize=figsize)
 
-    palette = sns.palettes.color_palette()
-
     sns.lineplot(
         df,
         x=x,
         y=y, 
         hue=hue,
         ax=axe,
-        palette=palette,        
+        palette=_get_palette(),        
     )
 
     axe = _set_label_layout(axe, fs, title, xlabel, ylabel, tight_layout)
 
     return fig, axe
 
-def violinplot(
+def stripplot(
         df:pd.DataFrame,
         x:str,
         y:str,
         hue:str = None,
+        palette: List[str] = None,
+        fig = None,
+        axe = None, 
+        fs = None,
         title:str = None,
         xlabel:str = None,
         ylabel:str = None,
         figsize:Tuple[int] = (10, 6),
         tight_layout:bool = False
     ):
-    fig, axe, fs = _get_baseplot(figsize=figsize)
+    if axe is None:
+        fig, axe, fs = _get_baseplot(figsize=figsize)  
+    
+    if palette is None:
+        palette = _get_palette()
 
-    palette = sns.palettes.color_palette()
-
-    sns.violinplot(
+    sns.stripplot(
         df,
         x=x,
         y=y, 
         hue=hue,
         ax=axe,
         palette=palette,
-        width=0.5,
-        
     )
+    axe = _set_label_layout(axe, fs, title, xlabel, ylabel, tight_layout)
+
+    return fig, axe
+
+
+def violinplot(
+        df:pd.DataFrame,
+        x:str,
+        y:str,
+        hue:str = None,
+        addstrip:bool = True,
+        title:str = None,
+        xlabel:str = None,
+        ylabel:str = None,
+        figsize:Tuple[int] = (10, 6),
+        tight_layout:bool = False
+    ):
+    fig, axe, fs = _get_baseplot(figsize=figsize)  
+    
+    palette = _get_palette()
+    violin = sns.violinplot(
+        df,
+        x=x,
+        y=y, 
+        hue=hue,
+        ax=axe,
+        palette=palette,
+        inner='box'
+    )
+    if addstrip:
+        _, axe = stripplot(df, x, y, hue, palette, fig, axe, fs)
+        for patch in violin.collections:
+            patch.set_alpha(0.2)
 
     axe = _set_label_layout(axe, fs, title, xlabel, ylabel, tight_layout)
 
@@ -84,18 +127,17 @@ def boxplot(
         df:pd.DataFrame,
         x:str,
         y:str,
-        stripplot:bool = True,
         hue:str = None,
+        addstrip:bool = True,
         title:str = None,
         xlabel:str = None,
         ylabel:str = None,
         figsize:Tuple[int] = (10, 6),
         tight_layout:bool = False
     ):
-    fig, axe, fs = _get_baseplot(figsize=figsize)
+    fig, axe, fs = _get_baseplot(figsize=figsize)  
     
-    palette = sns.palettes.color_palette()
-
+    palette = _get_palette()
     box = sns.boxplot(
         df,
         x=x,
@@ -104,12 +146,11 @@ def boxplot(
         ax=axe,
         palette=palette,
         width=0.5,
-        
     )
-    if stripplot:
+    if addstrip:
+        _, axe = stripplot(df, x, y, hue, palette, fig, axe, fs)
         for patch in box.patches:
             patch.set_alpha(0.6)
-        sns.stripplot(df, x=x, y=y, hue=hue, ax=axe, palette=palette)
 
     axe = _set_label_layout(axe, fs, title, xlabel, ylabel, tight_layout)
 
@@ -129,12 +170,18 @@ def histplot(
     ):
     fig, axe, fs = _get_baseplot(figsize=figsize)
 
-    sns.histplot(df, x=x, hue=hue, bins=bins, kde=kde)
-    
+    sns.histplot(
+        df, 
+        x=x,
+        hue=hue, 
+        ax=axe, 
+        palette=_get_palette(),
+        bins=bins, 
+        kde=kde
+    )
     axe = _set_label_layout(axe, fs, title, xlabel, ylabel, tight_layout)
 
     return fig, axe
-
 
 def pieplot(
         df:pd.DataFrame,
@@ -154,7 +201,7 @@ def pieplot(
         radius=1,
         labels=df[x],
         labeldistance=1,
-        colors=sns.palettes.color_palette(),
+        colors=_get_palette(),
         wedgeprops=dict(width=0.45, edgecolor='white', linewidth=linewidth),
         autopct='%1.1f%%'
     )
@@ -185,10 +232,16 @@ def barplot(
     ):
     fig, axe, fs = _get_baseplot(figsize=figsize)
 
-    sns.barplot(data=df, x=x, y=y, hue=hue, ax=axe)
-
+    sns.barplot(
+        df, 
+        x=x, 
+        y=y, 
+        hue=hue, 
+        ax=axe, 
+        palette=_get_palette()
+    )
     for i, value in enumerate(df[y]):
-        axe.text(i, value + 2, f"{value}", ha="center", va="bottom", fontsize=fs['label'])
+        axe.text(i, value, f"{value:.4f}", ha="center", va="bottom", fontsize=fs['label'])
 
     axe = _set_label_layout(axe, fs, title, xlabel, ylabel, tight_layout)
 
@@ -198,16 +251,17 @@ def barplot(
 # Utilities #
 #############
 
-def _get_fontsize(figsize, base_area=40):
-    w, h = figsize
-    area = w * h
-    scale = area / base_area
+def _get_palette():
+    len_palette = len(_PALETTES)
+    idx = np.random.choice(np.arange(len_palette), len_palette, False)
+    return np.concatenate([_PALETTES[i] for i in idx], axis=0)
 
+def _get_fontsize(figsize, base_area=40):
+    scale = figsize[0] * figsize[1] / base_area
     return {
         "title": round(15 * scale, 1),
         "label": round(11 * scale, 1),
-        "tick": round(9 * scale, 1)
-    }
+        "tick": round(9 * scale, 1)}
 
 def _get_baseplot(
         figsize:Tuple[int] = (10, 6)
