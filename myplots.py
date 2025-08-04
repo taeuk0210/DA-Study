@@ -17,10 +17,10 @@ plt.style.use("ggplot")
 # Set global constants
 
 _COLORS = [
-    ["#B2B0E8", "#1A2A80", "#7A85C1", "#3B38A0",],
-    ["#EEEEEE", "#B9375D", "#E7D3D3", "#D25D5D",],
-    ["#FCF8DD", "#00809D", "#FFD700", "#D3AF37",],
-    ["#FEFFC4", "#799EFF", "#FFDE63", "#FFBC4C",],
+    ["#B2B0E8", "#1A2A80", "#7A85C1", "#3B38A0"],
+    ["#EEEEEE", "#B9375D", "#E7D3D3", "#D25D5D"],
+    ["#FCF8DD", "#00809D", "#FFD700", "#D3AF37"],
+    ["#FEFFC4", "#799EFF", "#FFDE63", "#FFBC4C"],
 ]
 
 #############
@@ -213,6 +213,7 @@ def pieplot(
         df:pd.DataFrame,
         x:str,
         y:str,
+        hue:str,
         center_text:str = None,
         figsize:Tuple[int] = (10, 6),
         fig = None,
@@ -225,16 +226,17 @@ def pieplot(
         legend:bool = True,
     ):
     fig, axe, fs = _get_baseplot(figsize, fig, axe, fs)
-    _, palette = _get_palette(df, None, palette)
-    
+    _, palette = _get_palette(df, hue, palette)
     linewidth = figsize[0] * figsize[1] // 20
+
+    df = df.sort_values(hue)
 
     _, texts, autotexts = axe.pie(
         df[y],
         radius=1,
         labels=df[x],
         labeldistance=1,
-        colors=palette,
+        colors=[palette[k] for k in palette.keys()],
         wedgeprops=dict(width=0.45, edgecolor='white', linewidth=linewidth),
         autopct='%1.1f%%'
     )
@@ -310,18 +312,22 @@ def baseplot(
 
 def _get_colors(num_colors:int = 4):
     len_color_sets = len(_COLORS)
-    if (num_colors <= 4):
+    if (num_colors <= len(_COLORS[0])):
         return _COLORS[np.random.randint(0, len_color_sets)]
     np.random.shuffle(_COLORS)
     return np.concatenate([c for c in _COLORS], axis=0)
 
-def _get_palette(df, hue=None, palette=None):
-    if hue is None:
-        return None, _get_colors(5) if palette is None else palette
-
+def _get_palette(df, hue, palette=None):
     hue_order = sorted(df[hue].unique())
+    
+    if palette is not None:
+        palette = [(k,v) for k,v in palette.items() if k in hue_order]
+        palette = sorted(palette, key=lambda x: x[0])
+        palette = {k:v for k,v in palette}
+        return hue_order, palette
+
     colors = _get_colors(len(hue_order))
-    palette = palette if palette is not None else {h:c for h, c in zip(hue_order, colors)}
+    palette = {h:c for h, c in zip(hue_order, colors)} if palette is None else palette 
     return hue_order, palette
 
 def _get_fontsize(figsize, nrow, ncol):
@@ -347,7 +353,7 @@ def _get_baseplot(
     fs = _get_fontsize(figsize, nrow, ncol)
 
     if nrow * ncol == 1:
-        axe.set_facecolor("#F0F0F0")
+        axe.set_facecolor("#FFFFFF")
     else:
         for ax in axe.flatten():
             ax.set_facecolor("#F0F0F0")
