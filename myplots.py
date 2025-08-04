@@ -17,12 +17,10 @@ plt.style.use("ggplot")
 # Set global constants
 
 _COLORS = [
-    ["#A6E3E9", "#71C9CE", "#E3FDFD", "#CBF1F5"],
-    ["#3F72AF", "#112D4E", "#F9F7F7", "#DBE2EF"],
-    ["#FFD1D1", "#FF9494", "#FFF5E4", "#FFE3E1"],
-    ["#B83B5E", "#6A2C70", "#F9ED69", "#F08A5D"],
-    ["#F5F5F5", "#FC5185", "#364F6B", "#3FC1C9"],
-    ["#609966", "#40513B", "#EDF1D6", "#9DC08B"],
+    ["#B2B0E8", "#1A2A80", "#7A85C1", "#3B38A0",],
+    ["#EEEEEE", "#B9375D", "#E7D3D3", "#D25D5D",],
+    ["#FCF8DD", "#00809D", "#FFD700", "#D3AF37",],
+    ["#FEFFC4", "#799EFF", "#FFDE63", "#FFBC4C",],
 ]
 
 #############
@@ -44,15 +42,17 @@ def lineplot(
         ylabel:str = None,
         legend:bool = True,
     ):
-    fig, axe, fs, colors = _get_baseplot(figsize, fig, axe, fs, palette)
+    fig, axe, fs = _get_baseplot(figsize, fig, axe, fs)
+    hue_order, palette = _get_palette(df, hue, palette)
     
     sns.lineplot(
         data=df,
         x=x,
         y=y, 
         hue=hue,
+        hue_order=hue_order,
         ax=axe,
-        color=colors,        
+        color=palette,        
     )
 
     axe = _set_label_layout(axe, fs, title, xlabel, ylabel, legend)
@@ -74,17 +74,18 @@ def stripplot(
         ylabel:str = None,
         legend:bool = True,
     ):
-    fig, axe, fs, colors = _get_baseplot(figsize, fig, axe, fs, palette)
+    fig, axe, fs = _get_baseplot(figsize, fig, axe, fs)
+    hue_order, palette = _get_palette(df, hue, palette)
 
     sns.stripplot(
         data=df,
         x=x,
         y=y, 
         hue=hue,
-        hue_order=sorted(df[hue].unique()),
+        hue_order=hue_order,
         dodge=False,
         ax=axe,
-        palette=_get_palette(df, hue, colors),
+        palette=palette,
     )
     axe = _set_label_layout(axe, fs, title, xlabel, ylabel, legend)
 
@@ -107,24 +108,24 @@ def violinplot(
         ylabel:str = None,
         legend:bool = True,
     ):
-    fig, axe, fs, colors = _get_baseplot(figsize, fig, axe, fs, palette)
+    fig, axe, fs = _get_baseplot(figsize, fig, axe, fs)
+    hue_order, palette = _get_palette(df, hue, palette)
     
     violin = sns.violinplot(
         data=df,
         x=x,
         y=y, 
         hue=hue,
-        hue_order=sorted(df[hue].unique()),
         width=0.5,
         dodge=False,
         ax=axe,
-        palette=colors,
+        palette=palette,
         inner='box',
         linewidth=0.5,
     )
     if addstrip:
         from matplotlib.collections import PolyCollection
-        _, axe = stripplot(df, x, y, hue, figsize, fig, axe, fs, colors, legend=False)
+        _, axe = stripplot(df, x, y, hue, figsize, fig, axe, fs, palette, legend=False)
         for patch in violin.collections:
                 if isinstance(patch, PolyCollection):
                     patch.set_alpha(0.6)
@@ -151,22 +152,23 @@ def boxplot(
         ylabel:str = None,
         legend:bool = True,
     ):
-    fig, axe, fs, colors = _get_baseplot(figsize, fig, axe, fs, palette)
+    fig, axe, fs = _get_baseplot(figsize, fig, axe, fs)
+    hue_order, palette = _get_palette(df, hue, palette)
     
     box = sns.boxplot(
         data=df,
         x=x,
         y=y, 
         hue=hue,
-        hue_order=sorted(df[hue].unique()),
+        hue_order=hue_order,
         width=0.5,
         dodge=False,
         ax=axe,
-        palette=colors,
+        palette=palette,
         linewidth=0.5,
     )
     if addstrip:
-        _, axe = stripplot(df, x, y, hue, figsize, fig, axe, fs, colors, legend=False)
+        _, axe = stripplot(df, x, y, hue, figsize, fig, axe, fs, palette, legend=False)
         for patch in box.patches:
             patch.set_alpha(0.6)
 
@@ -190,15 +192,16 @@ def histplot(
         ylabel:str = None,
         legend:bool = True,
     ):
-    fig, axe, fs, colors = _get_baseplot(figsize, fig, axe, fs, palette)
+    fig, axe, fs = _get_baseplot(figsize, fig, axe, fs)
+    hue_order, palette = _get_palette(df, hue, palette)
 
     sns.histplot(
         data=df, 
         x=x,
         hue=hue, 
-        hue_order=sorted(df[hue].unique()),
+        hue_order=hue_order,
         ax=axe, 
-        palette=_get_palette(df, hue, colors),
+        palette=palette,
         bins=bins, 
         kde=kde
     )
@@ -221,7 +224,8 @@ def pieplot(
         ylabel:str = None,
         legend:bool = True,
     ):
-    fig, axe, fs, colors = _get_baseplot(figsize, fig, axe, fs, palette)
+    fig, axe, fs = _get_baseplot(figsize, fig, axe, fs)
+    _, palette = _get_palette(df, None, palette)
     
     linewidth = figsize[0] * figsize[1] // 20
 
@@ -230,7 +234,7 @@ def pieplot(
         radius=1,
         labels=df[x],
         labeldistance=1,
-        colors=colors,
+        colors=palette,
         wedgeprops=dict(width=0.45, edgecolor='white', linewidth=linewidth),
         autopct='%1.1f%%'
     )
@@ -253,6 +257,7 @@ def barplot(
         x:str,
         y:str,
         hue:str,
+        addtext:bool = False,
         figsize:Tuple[int] = (10, 6),
         fig = None,
         axe = None,
@@ -263,21 +268,27 @@ def barplot(
         ylabel:str = None,
         legend:bool = True,
     ):
-    fig, axe, fs, colors = _get_baseplot(figsize, fig, axe, fs, palette)
+    fig, axe, fs = _get_baseplot(figsize, fig, axe, fs)
+    hue_order, palette = _get_palette(df, hue, palette)
+
+    max_label_len = max([len(lab) for lab in hue_order])
 
     sns.barplot(
         data=df, 
         x=x, 
         y=y, 
         hue=hue, 
-        hue_order=sorted(df[hue].unique()),
+        hue_order=hue_order,
         width=0.5,
         dodge=False,
         ax=axe, 
-        palette=colors
+        palette=palette,
     )
-    for i, value in enumerate(df[y]):
-        axe.text(i, value, f"{value:.4f}", ha="center", va="bottom", fontsize=fs['label'])
+    if addtext:
+        for i, value in enumerate(df[y]):
+            axe.text(i, value, f"{value:.4f}", ha="center", va="bottom", fontsize=fs['label'])
+    if max_label_len > 6:
+        axe.tick_params(axis='x', rotation=90)
 
     axe = _set_label_layout(axe, fs, title, xlabel, ylabel, legend)
 
@@ -288,24 +299,30 @@ def baseplot(
         fig = None,
         axe = None,
         fs = None,
-        palette = None,
         nrow:int = 1,
         ncol:int = 1, 
     ):
-    return _get_baseplot(figsize, fig, axe, fs, palette, nrow, ncol)
+    return _get_baseplot(figsize, fig, axe, fs, nrow, ncol)
 
 #############
 # Utilities #
 #############
 
-def _get_colors():
-    len_palette = len(_COLORS)
-    idx = np.random.choice(np.arange(len_palette), len_palette, False)
-    return np.concatenate([_COLORS[i] for i in idx], axis=0)
+def _get_colors(num_colors:int = 4):
+    len_color_sets = len(_COLORS)
+    if (num_colors <= 4):
+        return _COLORS[np.random.randint(0, len_color_sets)]
+    np.random.shuffle(_COLORS)
+    return np.concatenate([c for c in _COLORS], axis=0)
 
-def _get_palette(df, hue, color):
+def _get_palette(df, hue=None, palette=None):
+    if hue is None:
+        return None, _get_colors(5) if palette is None else palette
+
     hue_order = sorted(df[hue].unique())
-    return {h:c for h, c in zip(hue_order, color)}
+    colors = _get_colors(len(hue_order))
+    palette = palette if palette is not None else {h:c for h, c in zip(hue_order, colors)}
+    return hue_order, palette
 
 def _get_fontsize(figsize, nrow, ncol):
     minsize = min(int(figsize[0] / ncol), int(figsize[1] / nrow))
@@ -320,16 +337,11 @@ def _get_baseplot(
         fig = None,
         axe = None,
         fs = None,
-        palette = None,
         nrow:int = 1,
         ncol:int = 1, 
     ):
-
-    if palette is None:
-        palette = _get_colors()
-
     if fig is not None and axe is not None and fs is not None:
-        return fig, axe, fs, palette
+        return fig, axe, fs
     
     fig, axe = plt.subplots(nrow, ncol, figsize=figsize)
     fs = _get_fontsize(figsize, nrow, ncol)
@@ -339,7 +351,7 @@ def _get_baseplot(
     else:
         for ax in axe.flatten():
             ax.set_facecolor("#F0F0F0")
-    return fig, axe, fs, palette
+    return fig, axe, fs
 
 def _set_label_layout(
         axe,
