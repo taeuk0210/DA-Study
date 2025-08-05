@@ -21,6 +21,7 @@ _COLORS = [
     ["#EEEEEE", "#B9375D", "#E7D3D3", "#D25D5D"],
     ["#FCF8DD", "#00809D", "#FFD700", "#D3AF37"],
     ["#FEFFC4", "#799EFF", "#FFDE63", "#FFBC4C"],
+    ["#77BEF0", "#FFCB61", "#FF894F", "#EA5B6F"],
 ]
 
 #############
