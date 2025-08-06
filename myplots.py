@@ -28,6 +28,38 @@ _COLORS = [
 # Draw plot #
 #############
 
+def scatterplot(
+        df:pd.DataFrame,
+        x:str,
+        y:str,
+        hue:str = None,
+        figsize:Tuple[int] = (10, 6),
+        fig = None,
+        axe = None,
+        fs = None,
+        palette = None,
+        title:str = None,
+        xlabel:str = None,
+        ylabel:str = None,
+        legend:bool = True,
+    ):
+    fig, axe, fs = _get_baseplot(figsize, fig, axe, fs)
+    hue_order, palette = _get_palette(df, hue, palette)
+    
+    sns.scatterplot(
+        data=df,
+        x=x,
+        y=y, 
+        hue=hue,
+        hue_order=hue_order,
+        ax=axe,
+        palette=palette,        
+    )
+
+    axe = _set_label_layout(axe, fs, title, xlabel, ylabel, legend)
+
+    return fig, axe
+
 def lineplot(
         df:pd.DataFrame,
         x:str,
