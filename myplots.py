@@ -28,6 +28,31 @@ _COLORS = [
 # Draw plot #
 #############
 
+def featureplot(
+        feature_value,
+        feature_name,
+        figsize:Tuple[int] = (10, 6),
+        fig = None,
+        axe = None,
+        fs = None,
+        title:str = None,
+        xlabel:str = None,
+        ylabel:str = None,
+        legend:bool = True
+    ):
+    fig, axe, fs = _get_baseplot(figsize, fig, axe, fs)
+    
+    sns.barplot(
+        x=feature_name,
+        y=feature_value,
+        orient="h",
+        palette="rainbow"
+    )
+
+    axe = _set_label_layout(axe, fs, title, xlabel, ylabel, legend)
+
+    return fig, axe
+
 def heatmap(
         df:pd.DataFrame,
         figsize:Tuple[int] = (10, 6),
@@ -42,7 +67,8 @@ def heatmap(
     fig, axe, fs = _get_baseplot(figsize, fig, axe, fs)
     
     sns.heatmap(
-        data=df,ax=axe,    
+        data=df,
+        ax=axe,    
     )
 
     axe = _set_label_layout(axe, fs, title, xlabel, ylabel, legend)
