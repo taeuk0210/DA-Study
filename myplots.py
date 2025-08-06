@@ -28,6 +28,28 @@ _COLORS = [
 # Draw plot #
 #############
 
+def heatmap(
+        df:pd.DataFrame,
+        figsize:Tuple[int] = (10, 6),
+        fig = None,
+        axe = None,
+        fs = None,
+        title:str = None,
+        xlabel:str = None,
+        ylabel:str = None,
+        legend:bool = True,
+    ):
+    fig, axe, fs = _get_baseplot(figsize, fig, axe, fs)
+    
+    sns.heatmap(
+        data=df,ax=axe,    
+    )
+
+    axe = _set_label_layout(axe, fs, title, xlabel, ylabel, legend)
+
+    return fig, axe
+
+
 def scatterplot(
         df:pd.DataFrame,
         x:str,
