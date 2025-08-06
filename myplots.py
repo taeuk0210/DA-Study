@@ -33,6 +33,7 @@ def scatterplot(
         x:str,
         y:str,
         hue:str = None,
+        addline:bool = False,
         figsize:Tuple[int] = (10, 6),
         fig = None,
         axe = None,
@@ -55,6 +56,12 @@ def scatterplot(
         ax=axe,
         palette=palette,        
     )
+
+    if addline:
+        from sklearn.linear_model import LinearRegression
+        lm = LinearRegression()
+        lm.fit(df["X"].values.reshape(-1, 1), df["Y"].values.reshape(-1, 1))
+        axe.axline((0, lm.intercept_[0]), slope=lm.coef_[0][0])
 
     axe = _set_label_layout(axe, fs, title, xlabel, ylabel, legend)
 
