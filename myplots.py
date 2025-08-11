@@ -29,8 +29,8 @@ _COLORS = [
 #############
 
 def featureplot(
-        feature_value,
         feature_name,
+        feature_value,
         figsize:Tuple[int] = (10, 6),
         fig = None,
         axe = None,
