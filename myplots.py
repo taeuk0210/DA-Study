@@ -43,10 +43,11 @@ def featureplot(
     fig, axe, fs = _get_baseplot(figsize, fig, axe, fs)
     
     sns.barplot(
-        x=feature_name,
-        y=feature_value,
+        x=feature_value,
+        y=feature_name,
         orient="h",
-        palette="rainbow"
+        palette="rainbow",
+        ax=axe
     )
 
     axe = _set_label_layout(axe, fs, title, xlabel, ylabel, legend)
